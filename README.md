@@ -20,9 +20,9 @@ the data.
 
 - `B` [Linked List](/data-structures/linked-list)
 - `B` [Doubly Linked List](/data-structures/doubly-linked-list)
-- `B` ❌ [Queue](/data-structures/queue)
-- `B` ❌ [Stack](/data-structures/stack)
-- `B` ❌ [Hash Table](/data-structures/hash-table)
+- `B` [Queue](/data-structures/queue)
+- `B` [Stack](/data-structures/stack)
+- `B` [Hash Table](/data-structures/hash-table)
 - `B` ❌ [Heap](/data-structures/heap) - max and min heap versions
 - `B` ❌ [Priority Queue](/data-structures/priority-queue)
 - `A` ❌ [Trie](/data-structures/trie)
