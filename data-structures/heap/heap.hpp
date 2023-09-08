@@ -20,11 +20,9 @@ public:
         m_heap.push_back(t_value);
 
         if (m_heap.size() > 1) {
-            for (size_t i = m_heap.size() - 1; i > 0; i = ((i - 1) / 2)) {
-                if (m_heap[((i - 1) / 2)] < m_heap[i]) {
-                    T tmp = m_heap[((i - 1) / 2)];
-                    m_heap[((i - 1) / 2)] = m_heap[i];
-                    m_heap[i] = tmp;
+            for (size_t i = m_heap.size() - 1; i > 0; i = (i - 1) / 2) {
+                if (m_heap[(i - 1) / 2] < m_heap[i]) {
+                    std::iter_swap(m_heap.begin() + i, m_heap.begin() + (i - 1) / 2);
                 }
             }
         }
