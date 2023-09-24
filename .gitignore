@@ -2,8 +2,4 @@
 .vscode
 
 # Executable files
-**/*.exe
 **/output
-
-# External libs
-**/catch2
