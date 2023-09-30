@@ -20,11 +20,9 @@ public:
         m_heap.push_back(t_value);
 
         if (m_heap.size() >= 1) {
-            for (size_t i = m_heap.size() - 1; i > 0; i = (i - 1) / 2) {
-                auto parent = static_cast<size_t>((i - 1) / 2);
-
-                if (m_heap[parent] < m_heap[i]) {
-                    std::iter_swap(m_heap.begin() + i, m_heap.begin() + parent);
+            for (std::size_t i = m_heap.size() - 1; i > 0; i = (i - 1) / 2) {
+                if (m_heap[(i - 1) / 2] < m_heap[i]) {
+                    std::iter_swap(m_heap.begin() + i, m_heap.begin() + (i - 1) / 2);
                 }
             }
         }
@@ -38,8 +36,10 @@ public:
         m_heap.insert(m_heap.begin(), m_heap.back());
         m_heap.pop_back();
 
-        for (size_t i = 1; i < m_heap.size();) {
-            if (m_heap[i] > m_heap[i + 1]) {
+        auto size = m_heap.size();
+
+        for (std::size_t i = 1; i < size;) {
+            if (i == size - 1 || m_heap[i] > m_heap[i + 1]) {
                 if (m_heap[i] > m_heap[(i - 1) / 2]) {
                     std::iter_swap(m_heap.begin() + i, m_heap.begin() + (i - 1) / 2);
                     i = 2 * i + 1;
@@ -49,7 +49,7 @@ public:
             } else {
                 if (m_heap[i + 1] > m_heap[(i - 1) / 2]) {
                     std::iter_swap(m_heap.begin() + i + 1, m_heap.begin() + (i - 1) / 2);
-                    i = 2 * i + 2;
+                    i = 2 * (i + 1) + 1;
                 } else {
                     break;
                 }

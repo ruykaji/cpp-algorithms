@@ -23,8 +23,8 @@ the data.
 - `B` [Queue](/data-structures/queue)
 - `B` [Stack](/data-structures/stack)
 - `B` [Hash Table](/data-structures/hash-table)
-- `B` ❌ [Heap](/data-structures/heap) - max heap versions
-- `B` ❌ [Priority Queue](/data-structures/priority-queue)
+- `B` [Heap](/data-structures/heap) - max heap versions
+- `B` [Priority Queue](/data-structures/priority-queue)
 - `A` ❌ [Trie](/data-structures/trie)
 - `A` ❌ [Tree](/data-structures/tree)
   - `A` ❌ [Binary Search Tree](/data-structures/tree/binary-search-tree)
