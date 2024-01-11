@@ -1,5 +1,2 @@
-# Vs code files
 .vscode
-
-# Executable files
-**/output
+build
