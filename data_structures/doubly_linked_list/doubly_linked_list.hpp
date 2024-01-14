@@ -51,19 +51,19 @@ class DoublyLinkedList {
          * @brief Gets a shared pointer to the previous node.
          * @return A shared pointer to the previous node.
          */
-        inline std::shared_ptr<Node> get_prev() const { return m_ptr_prev; };
+        inline std::shared_ptr<Node> const& get_prev() const { return m_ptr_prev; };
 
         /**
          * @brief Gets a shared pointer to the next node.
          * @return A shared pointer to the next node.
          */
-        inline std::shared_ptr<Node> get_next() const { return m_ptr_next; };
+        inline std::shared_ptr<Node> const& get_next() const { return m_ptr_next; };
 
         /**
          * @brief Gets the value of the node.
          * @return The value stored in the node.
          */
-        inline T get_value() { return m_value; };
+        inline T const& get_value() const { return m_value; };
 
     private:
         // Pointer to the previous node in the doubly linked list
@@ -98,7 +98,7 @@ public:
          * Retrieves the current node that the iterator is pointing to.
          * @return std::shared_ptr<Node> A shared pointer to the current node.
          */
-        inline constexpr std::shared_ptr<Node> get() const { return m_node; };
+        inline constexpr std::shared_ptr<Node> const& get() const { return m_node; };
 
         /**
          * @brief Prefix increment operator.
@@ -108,11 +108,11 @@ public:
          */
         Iterator& operator++()
         {
-            if (!m_node->get_next()) {
+            if (!m_node) {
                 throw std::runtime_error("Cannot increment iterator, next node is null.");
             }
 
-            m_node = const_cast<std::shared_ptr<Node>>(m_node->get_next());
+            m_node = m_node->get_next();
             return *this;
         };
 
@@ -124,12 +124,12 @@ public:
          */
         Iterator operator++(int)
         {
-            if (!m_node->get_next()) {
+            if (!m_node) {
                 throw std::runtime_error("Cannot increment iterator, next node is null.");
             }
 
             Iterator tmp_itr = *this;
-            m_node = const_cast<std::shared_ptr<Node>>(m_node->get_next());
+            m_node = m_node->get_next();
             return tmp_itr;
         }
 
@@ -141,11 +141,11 @@ public:
          */
         Iterator& operator--()
         {
-            if (!m_node->get_prev()) {
+            if (!m_node) {
                 throw std::runtime_error("Cannot decrement iterator, previous node is null.");
             }
 
-            m_node = const_cast<std::shared_ptr<Node>>(m_node->get_prev());
+            m_node = m_node->get_prev();
             return *this;
         };
 
@@ -157,12 +157,12 @@ public:
          */
         Iterator operator--(int)
         {
-            if (!m_node->get_prev()) {
+            if (!m_node) {
                 throw std::runtime_error("Cannot decrement iterator, previous node is null.");
             }
 
             Iterator tmp_itr = *this;
-            m_node = const_cast<std::shared_ptr<Node>>(m_node->get_prev());
+            m_node = m_node->get_prev();
             return tmp_itr;
         }
 
@@ -171,7 +171,7 @@ public:
          * Returns a reference to the value of the node at the iterator's current position.
          * @return T& Reference to the node's value.
          */
-        T& operator*() { return m_node->get_value(); };
+        T const& operator*() const { return m_node->get_value(); };
 
         /**
          * @brief Bool conversion operator.
@@ -251,27 +251,16 @@ public:
 
         for (auto i = m_ptr_head; i != nullptr; i = i->get_next()) {
             if (itr == t_index) {
-                if (!i->get_prev()) {
-                    prepend(t_value);
-                    break;
-                }
-
-                if (!i->get_next()) {
-                    append(t_value);
-                    break;
-                }
-
                 auto ptr_new_node = std::make_shared<Node>(i->get_prev(), i, t_value);
 
                 i->set_prev(ptr_new_node);
                 i->get_prev()->set_next(ptr_new_node);
+                ++m_size;
                 break;
             };
 
             ++itr;
         };
-
-        ++m_size;
     };
 
     /**
@@ -279,14 +268,14 @@ public:
      * @throw std::runtime_error If the list is empty.
      * @return T The value of the removed head element.
      */
-    inline constexpr T pop_head()
+    inline T pop_head()
     {
         if (!m_ptr_head) {
-            std::runtime_error("Pop operation failed: The list is empty. No elements available for removal.");
+            throw std::runtime_error("Pop operation failed: The list is empty. No elements available for removal.");
         }
 
         T head_value = m_ptr_head->get_value();
-        const auto ptr_new_head = m_ptr_head->get_next();
+        auto ptr_new_head = m_ptr_head->get_next();
 
         if (ptr_new_head) {
             ptr_new_head->set_prev(nullptr);
@@ -306,14 +295,14 @@ public:
      * @throw std::runtime_error If the list is empty.
      * @return T The value of the removed tail element.
      */
-    inline constexpr T pop_tail()
+    inline T pop_tail()
     {
         if (!m_ptr_head) {
-            std::runtime_error("Pop operation failed: The list is empty. No elements available for removal.");
+            throw std::runtime_error("Pop operation failed: The list is empty. No elements available for removal.");
         }
 
         T tail_value = m_ptr_tail->get_value();
-        const auto ptr_new_tail = m_ptr_tail->get_prev();
+        auto ptr_new_tail = m_ptr_tail->get_prev();
 
         if (ptr_new_tail) {
             ptr_new_tail->set_next(nullptr);
@@ -333,10 +322,10 @@ public:
      * @param t_index The index of the element to erase.
      * @throw std::runtime_error If the list is empty or index is out of bounds.
      */
-    inline void erase(const std::size_t& t_index)
+    inline constexpr void erase(const std::size_t& t_index)
     {
         if (!m_ptr_head) {
-            std::runtime_error("Erase operation failed: The list is empty. No elements available for removal.");
+            throw std::runtime_error("Erase operation failed: The list is empty. No elements available for removal.");
         }
 
         std::size_t itr {};
@@ -358,13 +347,12 @@ public:
 
                 tmp_prev_node->set_next(tmp_next_node);
                 tmp_next_node->set_prev(tmp_prev_node);
+                --m_size;
                 break;
             }
 
             ++itr;
         }
-
-        --m_size;
     }
 
     /**
@@ -391,7 +379,7 @@ public:
      * @param t_value The value to set.
      * @return Iterator A iterator that points to the modified value.
      */
-    inline constexpr Iterator set(const std::size_t& t_index, const T& t_value) const
+    inline Iterator set(const std::size_t& t_index, const T& t_value)
     {
         std::size_t numeric_itr {};
         Iterator node_itr(m_ptr_head);
@@ -432,7 +420,7 @@ public:
      * @brief Returns the number of elements in the list.
      * @return The size of the list.
      */
-    inline constexpr std::size_t size() { return m_size; }
+    inline constexpr std::size_t const& size() const { return m_size; }
 
     /**
      * @brief Returns a iterator that point on the head node.
