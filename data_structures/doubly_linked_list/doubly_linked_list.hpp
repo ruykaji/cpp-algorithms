@@ -1,5 +1,5 @@
-#ifndef __DOUBLY_LINKED_LIST_H__
-#define __DOUBLY_LINKED_LIST_H__
+#ifndef __DOUBLY_LINKED_LIST_HPP__
+#define __DOUBLY_LINKED_LIST_HPP__
 
 #include <memory>
 #include <stdexcept>
