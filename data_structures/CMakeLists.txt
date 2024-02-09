@@ -1,7 +1,7 @@
 # Add subdirectory
 # ==========================================================================
-add_subdirectory(doubly_linked_list)
-# add_subdirectory(linked_list)
+# add_subdirectory(doubly_linked_list)
+add_subdirectory(linked_list)
 # add_subdirectory(hash_table)
 # add_subdirectory(heap)
 # add_subdirectory(queue)
