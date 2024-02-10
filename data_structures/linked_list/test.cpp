@@ -1,12 +1,12 @@
 #include <gtest/gtest.h>
 #include <string>
-#include <vector>
+#include <list>
 
 #include "linked_list.hpp"
 
 TEST (LinkedListContainer, EmptyWhenEmpty)
 {
-  my_std::LinkedList<int> list;
+  LinkedList<int> list;
 
   EXPECT_EQ (list.size (), 0);
   EXPECT_TRUE (list.empty ());
@@ -14,7 +14,7 @@ TEST (LinkedListContainer, EmptyWhenEmpty)
 
 TEST (LinkedListContainer, BeginEqualEndIteratorWhenEmpty)
 {
-  my_std::LinkedList<int> list;
+  LinkedList<int> list;
 
   EXPECT_EQ (list.begin (), list.end ());
   EXPECT_EQ (list.cbegin (), list.cend ());
@@ -22,7 +22,7 @@ TEST (LinkedListContainer, BeginEqualEndIteratorWhenEmpty)
 
 TEST (LinkedListContainer, ExpectOutOfRangeThrow)
 {
-  my_std::LinkedList<int> list;
+  LinkedList<int> list;
 
   {
     auto end_itr = list.end ();
@@ -41,7 +41,7 @@ TEST (LinkedListContainer, ExpectOutOfRangeThrow)
 
 TEST (LinkedListContainer, PushBackTrivialType)
 {
-  my_std::LinkedList<int> list;
+  LinkedList<int> list;
 
   for (std::size_t i = 0, end = 9; i != end; ++i)
     {
