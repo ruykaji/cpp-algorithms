@@ -16,7 +16,7 @@ struct Sgl_linked_list_node_base
 
 template <typename Tp> struct Sgl_linked_list_node : public Sgl_linked_list_node_base
 {
-  Sgl_linked_list_node() : Sgl_linked_list_node_base(), m_value(nullptr){};
+  Sgl_linked_list_node() : Sgl_linked_list_node_base(), m_value(){};
 
   template <typename... Args>
   Sgl_linked_list_node(Args&&... t_args) : Sgl_linked_list_node_base(), m_value(std::forward<Args>(t_args)...){};
@@ -26,13 +26,14 @@ template <typename Tp> struct Sgl_linked_list_node : public Sgl_linked_list_node
 
 template <typename Tp> class Sgl_linked_list_iterator
 {
-public:
-  using value_type = Tp;
-  using pointer = Tp*;
-  using reference = Tp&;
-  using difference_type = std::ptrdiff_t;
-  using iterator_category = std::forward_iterator_tag;
+  typedef Sgl_linked_list_iterator<Tp> self;
 
+public:
+  typedef Tp value_type;
+  typedef Tp* pointer;
+  typedef Tp& reference;
+  typedef std::ptrdiff_t difference_type;
+  typedef std::forward_iterator_tag iterator_category;
   Sgl_linked_list_iterator() : m_ptr(nullptr){};
 
   explicit Sgl_linked_list_iterator(Sgl_linked_list_node_base* t_ptr) noexcept : m_ptr(t_ptr){};
@@ -65,13 +66,13 @@ public:
   };
 
   friend bool
-  operator==(const Sgl_linked_list_iterator& t_lhs, const Sgl_linked_list_iterator& t_rhs) noexcept
+  operator==(const self& t_lhs, const self& t_rhs) noexcept
   {
     return t_lhs.m_ptr == t_rhs.m_ptr;
   };
 
   friend bool
-  operator!=(const Sgl_linked_list_iterator& t_lhs, const Sgl_linked_list_iterator& t_rhs) noexcept
+  operator!=(const self& t_lhs, const self& t_rhs) noexcept
   {
     return t_lhs.m_ptr != t_rhs.m_ptr;
   };
@@ -81,18 +82,20 @@ public:
 
 template <typename Tp> class Sgl_linked_list_const_iterator
 {
+  typedef Sgl_linked_list_const_iterator<Tp> self;
+
 public:
-  using value_type = Tp;
-  using pointer = const Tp*;
-  using reference = const Tp&;
-  using difference_type = std::ptrdiff_t;
-  using iterator_category = std::forward_iterator_tag;
+  typedef Tp value_type;
+  typedef const Tp* pointer;
+  typedef const Tp& reference;
+  typedef std::ptrdiff_t difference_type;
+  typedef std::forward_iterator_tag iterator_category;
 
   Sgl_linked_list_const_iterator() : m_ptr(nullptr){};
 
   explicit Sgl_linked_list_const_iterator(Sgl_linked_list_node_base* t_ptr) noexcept : m_ptr(t_ptr){};
 
-  Sgl_linked_list_const_iterator(const Sgl_linked_list_iterator<Tp>& t_itr) : m_ptr(t_itr.m_ptr){};
+  explicit Sgl_linked_list_const_iterator(const Sgl_linked_list_iterator<Tp>& t_itr) : m_ptr(t_itr.m_ptr){};
 
   reference
   operator*() const noexcept
@@ -119,6 +122,18 @@ public:
     Sgl_linked_list_const_iterator tmp = *this;
     ++(*this);
     return tmp;
+  };
+
+  friend bool
+  operator==(const self& t_lhs, const self& t_rhs) noexcept
+  {
+    return t_lhs.m_ptr == t_rhs.m_ptr;
+  };
+
+  friend bool
+  operator!=(const self& t_lhs, const self& t_rhs) noexcept
+  {
+    return t_lhs.m_ptr != t_rhs.m_ptr;
   };
 
   const Sgl_linked_list_node_base* m_ptr;
@@ -153,6 +168,11 @@ private:
   typedef typename std::allocator_traits<Alloc>::rebind_alloc<node> node_alloc;
   typedef std::allocator_traits<node_alloc> alloc_traits;
 
+  template <typename Itr> using Iterator_category = typename std::iterator_traits<Itr>::iterator_category;
+
+  template <typename Itr>
+  using Requires_input_itr = std::enable_if<std::is_convertible_v<Iterator_category<Itr>, std::input_iterator_tag>>;
+
 public:
   typedef Tp value_type;
   typedef Tp& reference;
@@ -167,25 +187,37 @@ public:
   explicit Single_linked_list(std::size_t t_size, const Alloc& t_alloc = Alloc())
       : m_size(0), m_head(), m_alloc(t_alloc)
   {
-    node_base* to = &m_head;
-
-    for(; t_size; --t_size)
-      {
-        to->m_ptr_next = m_create_node();
-        to = to->m_ptr_next;
-      }
+    m_default_init(t_size);
   };
 
   explicit Single_linked_list(std::size_t t_size, const Tp& t_value, const Alloc& t_alloc = Alloc())
       : m_size(0), m_head(), m_alloc(t_alloc)
   {
-    node_base* to = &m_head;
+    m_default_init(t_size, t_value);
+  };
 
-    for(; t_size; --t_size)
-      {
-        to->m_ptr_next = m_create_node(t_value);
-        to = to->m_ptr_next;
-      }
+  template <typename InputIter, typename = Requires_input_itr<InputIter>>
+  explicit Single_linked_list(InputIter t_first, InputIter t_last, const Alloc& t_alloc = Alloc())
+      : m_size(0), m_head(), m_alloc(t_alloc)
+  {
+    m_range_init(t_first, t_last);
+  }
+
+  explicit Single_linked_list(std::initializer_list<Tp> t_list) : m_size(0), m_head(), m_alloc(Alloc())
+  {
+    m_range_init(t_list.begin(), t_list.end());
+  }
+
+  explicit Single_linked_list(const Single_linked_list& t_list) : m_size(0), m_head(), m_alloc(t_list.m_alloc)
+  {
+    m_range_init(t_list.begin(), t_list.end());
+  };
+
+  explicit Single_linked_list(Single_linked_list&& t_list) noexcept
+      : m_size(t_list.size()), m_head(t_list.m_head), m_alloc(t_list.m_alloc)
+  {
+    t_list.m_size = 0;
+    t_list.m_head.m_ptr_next = nullptr;
   };
 
   iterator
@@ -407,6 +439,34 @@ protected:
     to->m_ptr_next = thing;
     ++m_size;
     return iterator(to->m_ptr_next);
+  }
+
+  template <typename... Args>
+  void
+  m_default_init(std::size_t t_size, Args&&... t_args)
+  {
+    node_base* to = &m_head;
+
+    for(; t_size; --t_size)
+      {
+        to->m_ptr_next = m_create_node(std::forward<Args>(t_args)...);
+        to = to->m_ptr_next;
+        ++m_size;
+      }
+  }
+
+  template <typename InputIter>
+  void
+  m_range_init(InputIter t_first, InputIter t_last)
+  {
+    node_base* to = &m_head;
+
+    for(; t_first != t_last; ++t_first)
+      {
+        to->m_ptr_next = m_create_node(*t_first);
+        to = to->m_ptr_next;
+        ++m_size;
+      }
   }
 
 protected:
