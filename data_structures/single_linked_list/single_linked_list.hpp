@@ -53,7 +53,7 @@ public:
   typedef std::forward_iterator_tag iterator_category;
   Sgl_linked_list_iterator() : m_ptr(nullptr){};
 
-  explicit Sgl_linked_list_iterator(Sgl_linked_list_node_base* t_ptr) noexcept : m_ptr(t_ptr){};
+  Sgl_linked_list_iterator(Sgl_linked_list_node_base* t_ptr) noexcept : m_ptr(t_ptr){};
 
   reference
   operator*() const noexcept
@@ -110,9 +110,9 @@ public:
 
   Sgl_linked_list_const_iterator() : m_ptr(nullptr){};
 
-  explicit Sgl_linked_list_const_iterator(Sgl_linked_list_node_base* t_ptr) noexcept : m_ptr(t_ptr){};
+  Sgl_linked_list_const_iterator(Sgl_linked_list_node_base* t_ptr) noexcept : m_ptr(t_ptr){};
 
-  explicit Sgl_linked_list_const_iterator(const Sgl_linked_list_iterator<Tp>& t_itr) : m_ptr(t_itr.m_ptr){};
+  Sgl_linked_list_const_iterator(const Sgl_linked_list_iterator<Tp>& t_itr) : m_ptr(t_itr.m_ptr){};
 
   reference
   operator*() const noexcept
@@ -361,7 +361,7 @@ public:
   void
   emplace_front(Args&&... t_args)
   {
-    iterator(m_insert_after(const_cast<node_base*>(cbefore_begin().m_ptr), std::forward<Args>(t_args)...));
+    m_insert_after(const_cast<node_base*>(cbefore_begin().m_ptr), std::forward<Args>(t_args)...);
   }
 
   iterator
@@ -412,7 +412,7 @@ public:
         return m_splice_after(t_pos, tmp__.before_begin(), tmp__.end());
       }
 
-    return iterator(t_pos.m_ptr);
+    return iterator(const_cast<node_base*>(t_pos.m_ptr));
   }
 
   template <typename... Args>
@@ -437,7 +437,7 @@ public:
   iterator
   erase_after(const_iterator t_pos) noexcept
   {
-    return m_erase_after(t_pos);
+    return m_erase_after(const_cast<node_base*>(t_pos.m_ptr));
   }
 
   iterator
@@ -446,7 +446,7 @@ public:
     node_base* to__ = const_cast<node_base*>(t_first.m_ptr);
 
     while(to__->m_ptr_next != t_last.m_ptr)
-      to__ = m_erase_after(to__);
+      m_erase_after(to__);
 
     return iterator(to__);
   }
@@ -503,17 +503,24 @@ public:
 
     iterator k__ = before_begin();
 
-    for(size_type i = 0; i < t_size; ++i)
-      ++k__;
-
     if(size__ > t_size)
-      erase_after(k__, end());
+      {
+        for(size_type i = 0; i < t_size; ++i)
+          ++k__;
+
+        erase_after(k__, end());
+      }
     else
-      insert_after(k__, t_size - size__, std::forward<Args>(t_args)...);
+      {
+        for(size_type i = 0; i < size__; ++i)
+          ++k__;
+
+        insert_after(k__, t_size - size__, std::forward<Args>(t_args)...);
+      }
   };
 
   void
-  reverse() const noexcept
+  reverse() noexcept
   {
     node_base* tail__ = m_head.m_ptr_next;
 

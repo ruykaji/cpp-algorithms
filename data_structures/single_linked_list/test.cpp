@@ -108,10 +108,10 @@ TEST(SingleLinkedListContainer, Initialization_List_Assignment)
     }
 }
 
-TEST(SingleLinkedListContainer, Copy_Assignment)
+TEST(SingleLinkedListContainer, Copy_Assignment_Less)
 {
   dsa::Single_linked_list<int> list_a{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-  dsa::Single_linked_list<int> list_b;
+  dsa::Single_linked_list<int> list_b{ 0, 1, 2, 3 };
 
   list_b = list_a;
 
@@ -123,6 +123,83 @@ TEST(SingleLinkedListContainer, Copy_Assignment)
       EXPECT_EQ(*itr_a, *itr_b);
       EXPECT_NE(&*itr_a, &*itr_b);
     }
+}
+
+TEST(SingleLinkedListContainer, Copy_Assignment_More)
+{
+  dsa::Single_linked_list<int> list_a{ 0, 1, 2, 3 };
+  dsa::Single_linked_list<int> list_b{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+  list_b = list_a;
+
+  EXPECT_EQ(list_a.size(), 4);
+  EXPECT_EQ(list_b.size(), 4);
+
+  for(auto itr_a = list_a.begin(), itr_b = list_b.begin(), end = list_a.end(); itr_a != end; ++itr_a, ++itr_b)
+    {
+      EXPECT_EQ(*itr_a, *itr_b);
+      EXPECT_NE(&*itr_a, &*itr_b);
+    }
+}
+
+TEST(SingleLinkedListContainer, Insert_Size)
+{
+  dsa::Single_linked_list<int> list;
+
+  list.insert_after(list.before_begin(), 10, 5);
+
+  for(auto value : list)
+    EXPECT_EQ(value, 5);
+}
+
+TEST(SingleLinkedListContainer, Insert_Iterator_Range)
+{
+  std::vector<int> vec{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+  dsa::Single_linked_list<int> list;
+
+  list.insert_after(list.before_begin(), vec.begin(), vec.end());
+
+  std::size_t i = 0;
+
+  for(auto value : list)
+    {
+      EXPECT_EQ(value, i);
+      ++i;
+    }
+}
+
+TEST(SingleLinkedListContainer, Insert_Initializer_List)
+{
+  dsa::Single_linked_list<int> list;
+
+  list.insert_after(list.before_begin(), { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+
+  std::size_t i = 0;
+
+  for(auto value : list)
+    {
+      EXPECT_EQ(value, i);
+      ++i;
+    }
+}
+
+TEST(SingleLinkedListContainer, Emplace_Front)
+{
+  dsa::Single_linked_list<std::string> list;
+
+  list.emplace_front("test string");
+
+  EXPECT_EQ(*list.begin(), "test string");
+}
+
+TEST(SingleLinkedListContainer, Erase_After)
+{
+  dsa::Single_linked_list<int> list{ 0, 1, 2 };
+
+  auto itr = list.erase_after(list.before_begin());
+
+  EXPECT_EQ(*itr, 1);
+  EXPECT_EQ(itr, list.begin());
 }
 
 TEST(SingleLinkedListContainer, Move_Assignment)
@@ -196,7 +273,76 @@ TEST(SingleLinkedListContainer, Splice_Two_Iterators)
     }
 }
 
+TEST(SingleLinkedListContainer, Remove)
+{
+  dsa::Single_linked_list<int> list{ 0, 1, 1, 0, 0, 1, 1, 0, 0, 1 };
 
+  list.remove(0);
+
+  EXPECT_EQ(list.size(), 5);
+
+  for(auto value : list)
+    EXPECT_EQ(value, 1);
+}
+
+TEST(SingleLinkedListContainer, Resize_Less)
+{
+  dsa::Single_linked_list<int> list{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+  EXPECT_EQ(list.size(), 10);
+
+  list.resize(5);
+
+  EXPECT_EQ(list.size(), 5);
+
+  std::size_t i = 0;
+
+  for(auto value : list)
+    {
+      EXPECT_EQ(value, i);
+      ++i;
+    }
+}
+
+TEST(SingleLinkedListContainer, Resize_More)
+{
+  dsa::Single_linked_list<int> list{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+  EXPECT_EQ(list.size(), 10);
+
+  list.resize(20, 1);
+
+  EXPECT_EQ(list.size(), 20);
+
+  auto itr = list.cbegin();
+
+  for(std::size_t i = 0; i < 10; ++i)
+    {
+      EXPECT_EQ(*itr, i);
+      ++itr;
+    }
+
+  for(std::size_t i = 0; i < 10; ++i)
+    {
+      EXPECT_EQ(*itr, 1);
+      ++itr;
+    }
+}
+
+TEST(SingleLinkedListContainer, Reverse)
+{
+  dsa::Single_linked_list<int> list{ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+
+  list.reverse();
+
+  std::size_t i = 9;
+
+  for(auto value : list)
+    {
+      EXPECT_EQ(value, i);
+      --i;
+    }
+}
 
 int
 main(int argc, char** argv)
