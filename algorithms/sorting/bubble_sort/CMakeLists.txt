@@ -1,0 +1,1 @@
+init_test(bubble_sort)
