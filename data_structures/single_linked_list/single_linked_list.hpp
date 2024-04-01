@@ -14,20 +14,20 @@ struct Sgl_linked_list_node_base
   Sgl_linked_list_node_base() noexcept : m_ptr_next(nullptr){};
 
   Sgl_linked_list_node_base*
-  m_transfer_after(Sgl_linked_list_node_base* t_begin, Sgl_linked_list_node_base* t_end) noexcept
+  m_transfer_after(Sgl_linked_list_node_base* begin, Sgl_linked_list_node_base* end) noexcept
   {
-    Sgl_linked_list_node_base* keep__ = t_begin->m_ptr_next;
+    Sgl_linked_list_node_base* keep__ = begin->m_ptr_next;
 
-    if(t_end)
+    if(end)
       {
-        t_begin->m_ptr_next = t_end->m_ptr_next;
-        t_end->m_ptr_next = m_ptr_next;
+        begin->m_ptr_next = end->m_ptr_next;
+        end->m_ptr_next = m_ptr_next;
       }
     else
-      t_begin->m_ptr_next = nullptr;
+      begin->m_ptr_next = nullptr;
 
     m_ptr_next = keep__;
-    return t_end;
+    return end;
   }
 };
 
@@ -38,12 +38,12 @@ template <typename Tp> struct Sgl_linked_list_node : public Sgl_linked_list_node
   Sgl_linked_list_node() : Sgl_linked_list_node_base(), m_value(){};
 
   template <typename... Args>
-  Sgl_linked_list_node(Args&&... t_args) : Sgl_linked_list_node_base(), m_value(std::forward<Args>(t_args)...){};
+  Sgl_linked_list_node(Args&&... args) : Sgl_linked_list_node_base(), m_value(std::forward<Args>(args)...){};
 };
 
 template <typename Tp> class Sgl_linked_list_iterator
 {
-  typedef Sgl_linked_list_iterator<Tp> self;
+  using Self = Sgl_linked_list_iterator<Tp>;
 
 public:
   typedef Tp value_type;
@@ -53,7 +53,7 @@ public:
   typedef std::forward_iterator_tag iterator_category;
   Sgl_linked_list_iterator() : m_ptr(nullptr){};
 
-  Sgl_linked_list_iterator(Sgl_linked_list_node_base* t_ptr) noexcept : m_ptr(t_ptr){};
+  Sgl_linked_list_iterator(Sgl_linked_list_node_base* ptr) noexcept : m_ptr(ptr){};
 
   reference
   operator*() const noexcept
@@ -83,15 +83,15 @@ public:
   };
 
   friend bool
-  operator==(const self& t_lhs, const self& t_rhs) noexcept
+  operator==(const Self& lhs, const Self& rhs) noexcept
   {
-    return t_lhs.m_ptr == t_rhs.m_ptr;
+    return lhs.m_ptr == rhs.m_ptr;
   };
 
   friend bool
-  operator!=(const self& t_lhs, const self& t_rhs) noexcept
+  operator!=(const Self& lhs, const Self& rhs) noexcept
   {
-    return t_lhs.m_ptr != t_rhs.m_ptr;
+    return lhs.m_ptr != rhs.m_ptr;
   };
 
   Sgl_linked_list_node_base* m_ptr;
@@ -99,7 +99,7 @@ public:
 
 template <typename Tp> class Sgl_linked_list_const_iterator
 {
-  typedef Sgl_linked_list_const_iterator<Tp> self;
+  using Self = Sgl_linked_list_const_iterator<Tp>;
 
 public:
   typedef Tp value_type;
@@ -110,9 +110,9 @@ public:
 
   Sgl_linked_list_const_iterator() : m_ptr(nullptr){};
 
-  Sgl_linked_list_const_iterator(Sgl_linked_list_node_base* t_ptr) noexcept : m_ptr(t_ptr){};
+  Sgl_linked_list_const_iterator(Sgl_linked_list_node_base* ptr) noexcept : m_ptr(ptr){};
 
-  Sgl_linked_list_const_iterator(const Sgl_linked_list_iterator<Tp>& t_itr) : m_ptr(t_itr.m_ptr){};
+  Sgl_linked_list_const_iterator(const Sgl_linked_list_iterator<Tp>& itr) : m_ptr(itr.m_ptr){};
 
   reference
   operator*() const noexcept
@@ -142,15 +142,15 @@ public:
   };
 
   friend bool
-  operator==(const self& t_lhs, const self& t_rhs) noexcept
+  operator==(const Self& lhs, const Self& rhs) noexcept
   {
-    return t_lhs.m_ptr == t_rhs.m_ptr;
+    return lhs.m_ptr == rhs.m_ptr;
   };
 
   friend bool
-  operator!=(const self& t_lhs, const self& t_rhs) noexcept
+  operator!=(const Self& lhs, const Self& rhs) noexcept
   {
-    return t_lhs.m_ptr != t_rhs.m_ptr;
+    return lhs.m_ptr != rhs.m_ptr;
   };
 
   const Sgl_linked_list_node_base* m_ptr;
@@ -158,16 +158,16 @@ public:
 
 template <typename Tp>
 bool
-operator==(const Sgl_linked_list_iterator<Tp>& t_lhs, const Sgl_linked_list_const_iterator<Tp>& t_rhs) noexcept
+operator==(const Sgl_linked_list_iterator<Tp>& lhs, const Sgl_linked_list_const_iterator<Tp>& rhs) noexcept
 {
-  return t_lhs.m_ptr == t_rhs.m_ptr;
+  return lhs.m_ptr == rhs.m_ptr;
 };
 
 template <typename Tp>
 bool
-operator!=(const Sgl_linked_list_iterator<Tp>& t_lhs, const Sgl_linked_list_const_iterator<Tp>& t_rhs) noexcept
+operator!=(const Sgl_linked_list_iterator<Tp>& lhs, const Sgl_linked_list_const_iterator<Tp>& rhs) noexcept
 {
-  return t_lhs.m_ptr != t_rhs.m_ptr;
+  return lhs.m_ptr != rhs.m_ptr;
 };
 
 template <typename Tp, typename Alloc = std::allocator<Tp>> class Single_linked_list
@@ -182,16 +182,16 @@ template <typename Tp, typename Alloc = std::allocator<Tp>> class Single_linked_
 private:
   typedef Sgl_linked_list_node_base node_base;
   typedef Sgl_linked_list_node<Tp> node;
-  typedef typename std::allocator_traits<Alloc>::rebind_alloc<node> node_alloc;
-  typedef std::allocator_traits<node_alloc> alloc_traits;
-
-  template <typename Itr> using Iterator_category = typename std::iterator_traits<Itr>::iterator_category;
+  typedef typename std::allocator_traits<Alloc>::rebind_alloc<node> alloc_node;
+  typedef std::allocator_traits<alloc_node> alloc_traits;
 
   template <typename Itr>
-  using Requires_input_itr = std::enable_if<std::is_convertible_v<Iterator_category<Itr>, std::input_iterator_tag>>;
+  using Requires_input_itr = std::enable_if<
+      std::is_convertible_v<typename std::iterator_traits<Itr>::iterator_category, std::input_iterator_tag>>;
 
 public:
   typedef Tp value_type;
+  typedef Alloc allocator_type;
   typedef Tp& reference;
   typedef const Tp& const_reference;
   typedef Sgl_linked_list_iterator<Tp> iterator;
@@ -199,43 +199,41 @@ public:
   typedef std::ptrdiff_t difference_type;
   typedef std::size_t size_type;
 
-  Single_linked_list() noexcept : m_head(), m_alloc(node_alloc()){};
+  Single_linked_list(const allocator_type& alloc = allocator_type()) noexcept : m_head(), m_alloc(alloc_node(alloc)){};
 
-  explicit Single_linked_list(const Alloc& t_alloc) noexcept : m_head(), m_alloc(node_alloc(t_alloc)){};
-
-  explicit Single_linked_list(size_type t_size, const Alloc& t_alloc = Alloc()) : m_head(), m_alloc(node_alloc(t_alloc))
+  explicit Single_linked_list(size_type size, const allocator_type& alloc = allocator_type())
+      : m_head(), m_alloc(alloc_node(alloc))
   {
-    m_default_init(t_size);
+    m_default_init(size);
   };
 
-  Single_linked_list(size_type t_size, const Tp& t_value, const Alloc& t_alloc = Alloc())
-      : m_head(), m_alloc(node_alloc(t_alloc))
+  Single_linked_list(size_type size, const Tp& value, const allocator_type& alloc = allocator_type())
+      : m_head(), m_alloc(alloc_node(alloc))
   {
-    m_default_init(t_size, t_value);
+    m_default_init(size, value);
   };
 
   template <typename InputIter, typename = Requires_input_itr<InputIter>>
-  Single_linked_list(InputIter t_first, InputIter t_last, const Alloc& t_alloc = Alloc())
-      : m_head(), m_alloc(node_alloc(t_alloc))
+  Single_linked_list(InputIter first, InputIter last, const allocator_type& alloc = allocator_type())
+      : m_head(), m_alloc(alloc_node(alloc))
   {
-    m_range_init(t_first, t_last);
+    m_range_init(first, last);
   }
 
-  Single_linked_list(std::initializer_list<Tp> t_list, const Alloc& t_alloc = Alloc())
-      : m_head(), m_alloc(node_alloc(t_alloc))
+  Single_linked_list(std::initializer_list<Tp> list) : m_head(), m_alloc(alloc_node())
   {
-    m_range_init(t_list.begin(), t_list.end());
+    m_range_init(list.begin(), list.end());
   }
 
-  Single_linked_list(const Single_linked_list& t_list)
-      : m_head(), m_alloc(alloc_traits::select_on_container_copy_construction(t_list.m_alloc))
+  Single_linked_list(const Single_linked_list& list)
+      : m_head(), m_alloc(alloc_traits::select_on_container_copy_construction(list.m_alloc))
   {
-    m_range_init(t_list.cbegin(), t_list.cend());
+    m_range_init(list.cbegin(), list.cend());
   };
 
-  Single_linked_list(Single_linked_list&& t_list) noexcept : m_head(), m_alloc(std::move(t_list.m_alloc))
+  Single_linked_list(Single_linked_list&& list) noexcept : m_head(), m_alloc(std::move(list.m_alloc))
   {
-    m_move_assign(std::move(t_list));
+    m_move_assign(std::move(list));
   };
 
   ~Single_linked_list()
@@ -244,48 +242,48 @@ public:
   }
 
   Single_linked_list&
-  operator=(std::initializer_list<Tp> t_list)
+  operator=(std::initializer_list<Tp> list)
   {
-    m_copy_assign(t_list.begin(), t_list.end());
+    m_copy_assign(list.begin(), list.end());
     return *this;
   }
 
   Single_linked_list&
-  operator=(const Single_linked_list& t_list)
+  operator=(const Single_linked_list& list)
   {
-    if(std::addressof(t_list) != this)
+    if(std::addressof(list) != this)
       {
         if(alloc_traits::propagate_on_container_copy_assignment::value)
           {
             if(alloc_traits::is_always_equal::value)
               {
-                if(m_alloc != t_list.m_alloc)
+                if(m_alloc != list.m_alloc)
                   clear();
               }
 
-            m_alloc = alloc_traits::select_on_container_copy_construction(t_list.m_alloc);
+            m_alloc = alloc_traits::select_on_container_copy_construction(list.m_alloc);
           }
 
-        m_copy_assign(t_list.cbegin(), t_list.cend());
+        m_copy_assign(list.cbegin(), list.cend());
       }
 
     return *this;
   }
 
   Single_linked_list&
-  operator=(Single_linked_list&& t_list) noexcept(std::is_nothrow_move_constructible<node_alloc>::value)
+  operator=(Single_linked_list&& list) noexcept(std::is_nothrow_move_constructible<alloc_node>::value)
   {
     if(alloc_traits::propagate_on_container_move_assignment::value || alloc_traits::is_always_equal::value)
       {
-        m_move_assign(std::move(t_list));
-        m_alloc = std::move(t_list.m_alloc);
+        m_move_assign(std::move(list));
+        m_alloc = std::move(list.m_alloc);
       }
     else
       {
-        if(m_alloc == t_list.m_alloc)
-          m_move_assign(std::move(t_list));
+        if(m_alloc == list.m_alloc)
+          m_move_assign(std::move(list));
         else
-          m_copy_assign(std::move_iterator(t_list.begin()), std::move_iterator(t_list.end()));
+          m_copy_assign(std::move_iterator(list.begin()), std::move_iterator(list.end()));
       }
 
     return *this;
@@ -346,80 +344,80 @@ public:
   };
 
   void
-  push_front(const Tp& t_value) noexcept
+  push_front(const Tp& value) noexcept
   {
-    m_insert_after(const_cast<node_base*>(cbefore_begin().m_ptr), t_value);
+    m_insert_after(const_cast<node_base*>(cbefore_begin().m_ptr), value);
   }
 
   void
-  push_front(Tp&& t_value)
+  push_front(Tp&& value)
   {
-    m_insert_after(const_cast<node_base*>(cbefore_begin().m_ptr), std::move(t_value));
+    m_insert_after(const_cast<node_base*>(cbefore_begin().m_ptr), std::move(value));
   }
 
   template <typename... Args>
   void
-  emplace_front(Args&&... t_args)
+  emplace_front(Args&&... args)
   {
-    m_insert_after(const_cast<node_base*>(cbefore_begin().m_ptr), std::forward<Args>(t_args)...);
+    m_insert_after(const_cast<node_base*>(cbefore_begin().m_ptr), std::forward<Args>(args)...);
   }
 
   iterator
-  insert_after(const_iterator t_pos, const Tp& t_value)
+  insert_after(const_iterator pos, const Tp& value)
   {
-    return iterator(m_insert_after(const_cast<node_base*>(t_pos.m_ptr), t_value));
+    return iterator(m_insert_after(const_cast<node_base*>(pos.m_ptr), value));
   }
 
   iterator
-  insert_after(const_iterator t_pos, Tp&& t_value)
+  insert_after(const_iterator pos, Tp&& value)
   {
-    return iterator(m_insert_after(const_cast<node_base*>(t_pos.m_ptr), std::move(t_value)));
+    return iterator(m_insert_after(const_cast<node_base*>(pos.m_ptr), std::move(value)));
   }
 
   iterator
-  insert_after(const_iterator t_pos, size_type t_count, const Tp& t_value)
+  insert_after(const_iterator pos, size_type t_count, const Tp& value)
   {
     if(t_count)
       {
-        Single_linked_list tmp__(t_count, t_value, m_alloc);
-        return m_splice_after(t_pos, tmp__.before_begin(), tmp__.end());
+        Single_linked_list tmp__(t_count, value, m_alloc);
+        return m_splice_after(pos, tmp__.before_begin(), tmp__.end());
       }
 
-    return iterator(const_cast<node_base*>(t_pos.m_ptr));
+    return iterator(const_cast<node_base*>(pos.m_ptr));
   }
 
   template <typename InputItr, typename = Requires_input_itr<InputItr>>
   iterator
-  insert_after(const_iterator t_pos, InputItr t_first, InputItr t_last) noexcept
+  insert_after(const_iterator pos, InputItr first, InputItr last) noexcept
   {
-    Single_linked_list tmp__(t_first, t_last, m_alloc);
+    Single_linked_list tmp__(first, last, m_alloc);
 
     if(!tmp__.empty())
       {
-        return m_splice_after(t_pos, tmp__.cbefore_begin(), tmp__.cend());
+        return m_splice_after(pos, tmp__.cbefore_begin(), tmp__.cend());
       }
 
-    return iterator(const_cast<node_base*>(t_pos.m_ptr));
+    return iterator(const_cast<node_base*>(pos.m_ptr));
   }
 
   iterator
-  insert_after(const_iterator t_pos, std::initializer_list<Tp> t_list) noexcept
+  insert_after(const_iterator pos, std::initializer_list<Tp> list) noexcept
   {
-    Single_linked_list tmp__(t_list);
+    Single_linked_list tmp__(list);
 
     if(!tmp__.empty())
       {
-        return m_splice_after(t_pos, tmp__.before_begin(), tmp__.end());
+        return m_splice_after(pos, tmp__.before_begin(), tmp__.end());
       }
 
-    return iterator(const_cast<node_base*>(t_pos.m_ptr));
+    return iterator(const_cast<node_base*>(pos.m_ptr));
   }
 
   template <typename... Args>
   iterator
-  emplace_after(const_iterator t_pos, Args&&... t_args)
+  emplace_after(const_iterator pos, Args&&... t_args)
   {
-    return iterator(m_insert_after(const_cast<node_base*>(t_pos.m_ptr), std::forward<Args>(t_args)...));
+    return iterator(m_insert_after(const_cast<node_base*>(pos.m_ptr), std::forward<Args>(t_args)...));
   }
 
   reference
@@ -435,106 +433,45 @@ public:
   }
 
   iterator
-  erase_after(const_iterator t_pos) noexcept
+  erase_after(const_iterator pos) noexcept
   {
-    return m_erase_after(const_cast<node_base*>(t_pos.m_ptr));
+    return m_erase_after(const_cast<node_base*>(pos.m_ptr));
   }
 
   iterator
-  erase_after(const_iterator t_first, const_iterator t_last) noexcept
+  erase_after(const_iterator first, const_iterator last) noexcept
   {
-    node_base* to__ = const_cast<node_base*>(t_first.m_ptr);
+    node_base* to__ = const_cast<node_base*>(first.m_ptr);
 
-    while(to__->m_ptr_next != t_last.m_ptr)
+    while(to__->m_ptr_next != last.m_ptr)
       m_erase_after(to__);
 
     return iterator(to__);
   }
 
   iterator
-  splice_after(const_iterator t_pos, Single_linked_list&& t_list) noexcept
+  splice_after(const_iterator pos, Single_linked_list& list) noexcept
   {
-    if(!t_list.empty())
-      return m_splice_after(t_pos, t_list.cbefore_begin(), t_list.cend());
+    if(!list.empty())
+      return m_splice_after(pos, list.cbefore_begin(), list.cend());
 
-    return iterator(const_cast<node_base*>(t_pos.m_ptr));
+    return iterator(const_cast<node_base*>(pos.m_ptr));
   }
 
   iterator
-  splice_after(const_iterator t_pos, const_iterator t_first, const_iterator t_last) noexcept
+  splice_after(const_iterator pos, Single_linked_list&& list) noexcept
   {
-    return m_splice_after(t_pos, t_first, t_last);
+    if(!list.empty())
+      return m_splice_after(pos, list.cbefore_begin(), list.cend());
+
+    return iterator(const_cast<node_base*>(pos.m_ptr));
   }
 
-  void
-  remove(const Tp& t_value)
+  iterator
+  splice_after(const_iterator pos, const_iterator first, const_iterator last) noexcept
   {
-    node_base* curr__ = &m_head;
-    node_base* extra__ = nullptr;
-
-    while(node* tmp__ = static_cast<node*>(curr__->m_ptr_next))
-      {
-        if(tmp__->m_value == t_value)
-          {
-            if(std::addressof(t_value) != std::addressof(tmp__->m_value))
-              {
-                m_erase_after(curr__);
-                continue;
-              }
-            else
-              extra__ = curr__;
-          }
-
-        curr__ = curr__->m_ptr_next;
-      }
-
-    if(extra__)
-      m_erase_after(extra__);
+    return m_splice_after(pos, first, last);
   }
-
-  template <typename... Args>
-  void
-  resize(size_type t_size, Args&&... t_args)
-  {
-    size_type size__ = size();
-
-    if(size__ == t_size)
-      return;
-
-    iterator k__ = before_begin();
-
-    if(size__ > t_size)
-      {
-        for(size_type i = 0; i < t_size; ++i)
-          ++k__;
-
-        erase_after(k__, end());
-      }
-    else
-      {
-        for(size_type i = 0; i < size__; ++i)
-          ++k__;
-
-        insert_after(k__, t_size - size__, std::forward<Args>(t_args)...);
-      }
-  };
-
-  void
-  reverse() noexcept
-  {
-    node_base* tail__ = m_head.m_ptr_next;
-
-    if(!tail__)
-      return;
-
-    while(node_base* tmp__ = tail__->m_ptr_next)
-      {
-        node_base* keep__ = m_head.m_ptr_next;
-        m_head.m_ptr_next = tmp__;
-        tail__->m_ptr_next = tmp__->m_ptr_next;
-        m_head.m_ptr_next->m_ptr_next = keep__;
-      }
-  };
 
   void
   clear() noexcept
@@ -562,13 +499,13 @@ public:
 protected:
   template <typename... Args>
   node*
-  m_create_node(Args&&... t_args)
+  m_create_node(Args&&... args)
   {
     node* thing__ = alloc_traits::allocate(m_alloc, 1);
 
     try
       {
-        alloc_traits::construct(m_alloc, thing__, std::forward<Args>(t_args)...);
+        alloc_traits::construct(m_alloc, thing__, std::forward<Args>(args)...);
       }
     catch(...)
       {
@@ -581,36 +518,36 @@ protected:
 
   template <typename... Args>
   node_base*
-  m_insert_after(node_base* t_pos, Args&&... t_args)
+  m_insert_after(node_base* pos, Args&&... args)
   {
-    node* thing__ = m_create_node(std::forward<Args>(t_args)...);
+    node* thing__ = m_create_node(std::forward<Args>(args)...);
 
-    thing__->m_ptr_next = t_pos->m_ptr_next;
-    t_pos->m_ptr_next = thing__;
-    return t_pos->m_ptr_next;
+    thing__->m_ptr_next = pos->m_ptr_next;
+    pos->m_ptr_next = thing__;
+    return pos->m_ptr_next;
   }
 
   node_base*
-  m_erase_after(node_base* t_pos) noexcept
+  m_erase_after(node_base* pos) noexcept
   {
-    node* curr__ = static_cast<node*>(t_pos->m_ptr_next);
+    node* curr__ = static_cast<node*>(pos->m_ptr_next);
 
-    t_pos->m_ptr_next = static_cast<node_base*>(curr__->m_ptr_next);
+    pos->m_ptr_next = static_cast<node_base*>(curr__->m_ptr_next);
 
     alloc_traits::destroy(m_alloc, curr__);
     alloc_traits::deallocate(m_alloc, curr__, 1);
 
-    return t_pos->m_ptr_next;
+    return pos->m_ptr_next;
   }
 
   iterator
-  m_splice_after(const_iterator t_pos, const_iterator t_first, const_iterator t_last) noexcept
+  m_splice_after(const_iterator pos, const_iterator first, const_iterator last) noexcept
   {
-    node_base* tmp__ = const_cast<node_base*>(t_pos.m_ptr);
-    node_base* begin__ = const_cast<node_base*>(t_first.m_ptr);
+    node_base* tmp__ = const_cast<node_base*>(pos.m_ptr);
+    node_base* begin__ = const_cast<node_base*>(first.m_ptr);
     node_base* end__ = begin__;
 
-    while(end__ && end__->m_ptr_next != t_last.m_ptr)
+    while(end__ && end__->m_ptr_next != last.m_ptr)
       end__ = end__->m_ptr_next;
 
     if(begin__ != end__)
@@ -621,64 +558,64 @@ protected:
 
   template <typename... Args>
   void
-  m_default_init(size_type t_size, Args&&... t_args)
+  m_default_init(size_type size, Args&&... args)
   {
     node_base* to__ = &m_head;
 
-    for(; t_size; --t_size)
+    for(; size; --size)
       {
-        to__->m_ptr_next = m_create_node(std::forward<Args>(t_args)...);
+        to__->m_ptr_next = m_create_node(std::forward<Args>(args)...);
         to__ = to__->m_ptr_next;
       }
   }
 
   template <typename InputIter>
   void
-  m_range_init(InputIter t_first, InputIter t_last)
+  m_range_init(InputIter first, InputIter last)
   {
     node_base* to__ = &m_head;
 
-    for(; t_first != t_last; ++t_first)
+    for(; first != last; ++first)
       {
-        to__->m_ptr_next = m_create_node(*t_first);
+        to__->m_ptr_next = m_create_node(*first);
         to__ = to__->m_ptr_next;
       }
   }
 
   template <typename InputIter>
   void
-  m_copy_assign(InputIter t_first, InputIter t_last)
+  m_copy_assign(InputIter first, InputIter last)
   {
     auto prev__ = cbefore_begin();
     auto cur__ = begin();
     auto end__ = cend();
 
-    while(cur__ != end__ && t_first != t_last)
+    while(cur__ != end__ && first != last)
       {
-        *cur__ = *t_first;
+        *cur__ = *first;
         ++prev__;
         ++cur__;
-        ++t_first;
+        ++first;
       }
 
-    if(t_first != t_last)
-      insert_after(prev__, t_first, t_last);
+    if(first != last)
+      insert_after(prev__, first, last);
     else if(cur__ != end__)
       erase_after(prev__, end__);
   }
 
   void
-  m_move_assign(Single_linked_list&& t_list) noexcept
+  m_move_assign(Single_linked_list&& list) noexcept
   {
     clear();
 
-    m_head.m_ptr_next = t_list.m_head.m_ptr_next;
-    t_list.m_head.m_ptr_next = nullptr;
+    m_head.m_ptr_next = list.m_head.m_ptr_next;
+    list.m_head.m_ptr_next = nullptr;
   }
 
 protected:
   node_base m_head;
-  node_alloc m_alloc;
+  alloc_node m_alloc;
 };
 
 }
