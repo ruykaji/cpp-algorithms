@@ -47,13 +47,13 @@ public:
   Dbl_linked_list_iterator(Dbl_linked_list_node_base* node) noexcept : m_node(node){};
 
   reference
-  operator*() noexcept
+  operator*() const noexcept
   {
     return static_cast<Dbl_linked_list_node<Tp>*>(m_node)->m_value;
   }
 
   pointer
-  operator->() noexcept
+  operator->() const noexcept
   {
     return std::addressof(static_cast<Dbl_linked_list_node<Tp>*>(m_node)->m_value);
   }
@@ -277,6 +277,25 @@ public:
     return *this;
   }
 
+  Self&
+  operator=(Self&& list) noexcept(std::is_nothrow_move_constructible<alloc_node>::value)
+  {
+    if(alloc_traits::propagate_on_container_move_assignment::value || alloc_traits::is_always_equal::value)
+      {
+        m_move_assignment(std::move(list));
+        m_alloc = std::move(list.m_alloc);
+      }
+    else
+      {
+        if(m_alloc == list.m_alloc)
+          m_move_assignment(std::move(list));
+        else
+          m_copy_assignment(std::make_move_iterator(list.begin()), std::make_move_iterator(list.end()));
+      }
+
+    return *this;
+  }
+
   iterator
   begin() noexcept
   {
@@ -313,23 +332,123 @@ public:
     return const_iterator(&m_head);
   }
 
+  reference
+  front() noexcept
+  {
+    return static_cast<node*>(m_head.m_next)->m_value;
+  }
+
+  const_reference
+  front() const noexcept
+  {
+    return static_cast<node*>(m_head.m_next)->m_value;
+  }
+
+  reference
+  back() noexcept
+  {
+    return static_cast<node*>(m_head.m_prev)->m_value;
+  }
+
+  const_reference
+  back() const noexcept
+  {
+    return static_cast<node*>(m_head.m_prev)->m_value;
+  }
+
+  void
+  push_front(const Tp& value)
+  {
+    m_insert(m_head.m_next, value);
+  }
+
+  void
+  push_front(Tp&& value)
+  {
+    m_insert(m_head.m_next, std::move(value));
+  }
+
+  void
+  push_back(const Tp& value)
+  {
+    m_insert(&m_head, value);
+  }
+
+  void
+  push_back(Tp&& value)
+  {
+    m_insert(&m_head, std::move(value));
+  }
+
+  template <typename... Args>
+  void
+  emplace(const_iterator pos, Args&&... args)
+  {
+    m_insert(const_cast<node_base*>(pos.m_node), std::forward<Args>(args)...);
+  }
+
+  template <typename... Args>
+  void
+  emplace_front(Args&&... args)
+  {
+    m_insert(m_head.m_next, std::forward<Args>(args)...);
+  }
+
+  template <typename... Args>
+  void
+  emplace_back(Args&&... args)
+  {
+    m_insert(&m_head, std::forward<Args>(args)...);
+  }
+
+  iterator
+  insert(const_iterator pos, const Tp& value)
+  {
+    return iterator(m_insert(const_cast<node_base*>(pos.m_node), value));
+  }
+
+  iterator
+  insert(const_iterator pos, Tp&& value)
+  {
+    return iterator(m_insert(const_cast<node_base*>(pos.m_node), std::move(value)));
+  }
+
+  iterator
+  insert(const_iterator pos, size_type count, const Tp& value)
+  {
+    if(count)
+      {
+        Self tmp(count, value);
+        m_splice(pos, tmp.begin(), tmp.end());
+        return iterator(const_cast<node_base*>(pos.m_node)->m_prev);
+      }
+
+    return iterator(const_cast<node_base*>(pos.m_node));
+  }
+
   template <typename Itr, typename = Requires_input_itr<Itr>>
   iterator
   insert(const_iterator pos, Itr first, Itr last)
   {
-    node_base* curr__ = const_cast<node_base*>(pos.m_node);
+    Self tmp(first, last);
 
-    while(first != last)
+    if(!tmp.empty())
       {
-        curr__ = m_insert(curr__, *first);
-        ++first;
+        m_splice(pos, tmp.begin(), tmp.end());
+        return iterator(const_cast<node_base*>(pos.m_node)->m_prev);
       }
 
-    return iterator(curr__);
+    return iterator(const_cast<node_base*>(pos.m_node));
   }
 
   iterator
-  erase(const_iterator first, const_iterator last)
+  erase(const_iterator pos) noexcept
+  {
+    return iterator(m_erase(const_cast<node_base*>(pos.m_node)));
+  }
+
+  iterator
+  erase(const_iterator first, const_iterator last) noexcept
   {
     node_base* curr__ = const_cast<node_base*>(first.m_node);
     const node_base* end__ = static_cast<const node_base*>(last.m_node);
@@ -338,6 +457,27 @@ public:
       curr__ = m_erase(curr__);
 
     return iterator(curr__);
+  }
+
+  void
+  splice(const_iterator pos, Self&& list) noexcept
+  {
+    if(!list.empty())
+      m_splice(pos, list.begin(), list.end());
+  }
+
+  void
+  splice(const_iterator pos, Self& list) noexcept
+  {
+    if(!list.empty())
+      m_splice(pos, list.begin(), list.end());
+  }
+
+  void
+  splice(const_iterator pos, const_iterator first, const_iterator last) noexcept
+  {
+    if(first != last)
+      m_splice(pos, first, last);
   }
 
   void
@@ -363,6 +503,12 @@ public:
       }
 
     return size__;
+  }
+
+  bool
+  empty()
+  {
+    return m_head.m_next == &m_head;
   }
 
 private:
@@ -492,6 +638,25 @@ private:
     prev__->m_next = next__;
 
     return next__;
+  }
+
+  void
+  m_splice(const_iterator pos, const_iterator first, const_iterator last)
+  {
+    node_base* curr__ = const_cast<node_base*>(pos.m_node);
+    node_base* first__ = const_cast<node_base*>(first.m_node);
+    node_base* last__ = const_cast<node_base*>(last.m_node);
+
+    node_base* last_prev__ = last__->m_prev;
+
+    last__->m_prev = first__->m_prev;
+    last__->m_prev->m_next = last__;
+
+    first__->m_prev = curr__->m_prev;
+    first__->m_prev->m_next = first__;
+
+    curr__->m_prev = last_prev__;
+    last_prev__->m_next = curr__;
   }
 
 private:
