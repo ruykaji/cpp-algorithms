@@ -58,19 +58,19 @@ public:
     return std::addressof(static_cast<Dbl_linked_list_node<Tp>*>(m_node)->m_value);
   }
 
-  Dbl_linked_list_iterator
+  Dbl_linked_list_iterator&
   operator++() noexcept
+  {
+    m_node = m_node->m_next;
+    return *this;
+  }
+
+  Dbl_linked_list_iterator
+  operator++(int) noexcept
   {
     Dbl_linked_list_iterator tmp__(*this);
     m_node = m_node->m_next;
     return tmp__;
-  }
-
-  Dbl_linked_list_iterator&
-  operator++(int) noexcept
-  {
-    m_node = m_node->m_next;
-    return *this;
   }
 
   Dbl_linked_list_iterator
@@ -130,19 +130,19 @@ public:
     return std::addressof(static_cast<const Dbl_linked_list_node<Tp>*>(m_node)->m_value);
   }
 
-  Dbl_linked_list_const_iterator
+  Dbl_linked_list_const_iterator&
   operator++() noexcept
+  {
+    m_node = m_node->m_next;
+    return *this;
+  }
+
+  Dbl_linked_list_const_iterator
+  operator++(int) noexcept
   {
     Dbl_linked_list_const_iterator tmp__(*this);
     m_node = m_node->m_next;
     return tmp__;
-  }
-
-  Dbl_linked_list_const_iterator&
-  operator++(int) noexcept
-  {
-    m_node = m_node->m_next;
-    return *this;
   }
 
   Dbl_linked_list_const_iterator
